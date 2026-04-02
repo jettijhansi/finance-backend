@@ -13,7 +13,7 @@ It simulates a real-world finance dashboard backend where users can manage trans
 ### User Management
 
 * Create and manage users
-* Assign roles: Admin, Analyst, Viewer
+* Assign roles: Admin, Analyst, Viewer (currently stored, not enforced via middleware)
 * Prevent duplicate email registration
 * Track user status (active/inactive)
 
@@ -120,8 +120,8 @@ http://127.0.0.1:8000/docs
 
 ## Assumptions
 
-* Authentication is simplified for this implementation
-* Records are currently linked to a default user
+* Authentication is not implemented in this version
+* Financial records are associated with a default user (user_id = 1)
 * SQLite is used for simplicity and quick setup
 
 ---
@@ -129,10 +129,11 @@ http://127.0.0.1:8000/docs
 ## Future Improvements
 
 * JWT-based authentication
-* Role-based access control enforcement
+* Full role-based access control enforcement (currently roles are not enforced at API level)
 * Pagination for large datasets
 * Advanced analytics such as monthly trends
 * Deployment to a cloud platform
+* Complete role-based access control enforcement (RBAC)
 
 ---
 
