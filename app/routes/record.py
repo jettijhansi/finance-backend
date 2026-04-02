@@ -14,13 +14,22 @@ def get_db():
         db.close()
 
 # Create Record
+from fastapi import Header
+
 @router.post("/", response_model=RecordResponse)
-def create_record(record: RecordCreate, db: Session = Depends(get_db)):
+def create_record(
+    record: RecordCreate,
+    role: str = Header(None),
+    db: Session = Depends(get_db)
+):
     
+    if role != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can create records")
+
     if record.type not in ["income", "expense"]:
         raise HTTPException(status_code=400, detail="Type must be income or expense")
 
-    db_record = Record(**record.dict(), user_id=1)  # temporary user
+    db_record = Record(**record.dict(), user_id=1)
     db.add(db_record)
     db.commit()
     db.refresh(db_record)
@@ -44,3 +53,29 @@ def get_records(
         query = query.filter(Record.category == category)
 
     return query.all()
+
+@router.put("/{record_id}", response_model=RecordResponse)
+def update_record(record_id: int, updated: RecordCreate, db: Session = Depends(get_db)):
+    record = db.query(Record).filter(Record.id == record_id).first()
+
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    for key, value in updated.dict().items():
+        setattr(record, key, value)
+
+    db.commit()
+    db.refresh(record)
+    return record
+
+@router.delete("/{record_id}")
+def delete_record(record_id: int, db: Session = Depends(get_db)):
+    record = db.query(Record).filter(Record.id == record_id).first()
+
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    db.delete(record)
+    db.commit()
+
+    return {"message": "Record deleted successfully"}
